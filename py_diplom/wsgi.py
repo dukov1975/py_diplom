@@ -1,5 +1,5 @@
 """
-WSGI config for py_diplom project.
+WSGI config for netology_pd_diplom project.
 
 It exposes the WSGI callable as a module-level variable named ``application``.
 
