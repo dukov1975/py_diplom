@@ -2,7 +2,7 @@ from django.urls import path
 from django_rest_passwordreset.views import reset_password_request_token, reset_password_confirm
 
 from .views import RegisterAccount, ConfirmAccount, LoginAccount, AccountDetails, ContactView, \
-    PartnerUpdate, PartnerState, ShopView, CategoryView, ProductView, BasketView, OrderView, PartnerOrders
+    PartnerState, ShopView, CategoryView, ProductView, BasketView, OrderView, Partner
 from rest_framework.schemas import get_schema_view
 
 app_name = 'api'
@@ -13,9 +13,9 @@ urlpatterns = [
     path('products', ProductView.as_view(), name='products'),
     path('categories', CategoryView.as_view(), name='categories'),
     path('shops', ShopView.as_view(), name='shops'),
-    path('partner/update', PartnerUpdate.as_view(), name='partner-update'),
+    path('partner/update', Partner.as_view({'post': 'update'}), name='partner-update'),
     path('partner/state', PartnerState.as_view(), name='partner-state'),
-    path('partner/orders', PartnerOrders.as_view(), name='partner-orders'),
+    path('partner/orders', Partner.as_view({'get': 'order'}), name='partner-orders'),
     path('user/contact', ContactView.as_view(), name='user-contact'),
     path('user/login', LoginAccount.as_view(), name='user-login'),
     path('user/details', AccountDetails.as_view(), name='user-details'),

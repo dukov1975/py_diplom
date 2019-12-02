@@ -7,7 +7,7 @@ from django.core.validators import URLValidator
 from django.db import IntegrityError
 from django.db.models import Q, Sum, Prefetch
 from requests import get
-from rest_framework import status
+from rest_framework import status, viewsets
 from rest_framework.authtoken.models import Token
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
@@ -61,6 +61,7 @@ class ConfirmAccount(APIView):
     """
     Класс для подтверждения почтового адреса
     """
+
     def post(self, request, *args, **kwargs):
         # проверяем обязательные аргументы
         if {'email', 'token'}.issubset(request.data):
@@ -83,6 +84,7 @@ class LoginAccount(APIView):
     """
     Класс для авторизации пользователей
     """
+
     def post(self, request, *args, **kwargs):
         if {'email', 'password'}.issubset(request.data):
             user = authenticate(request, username=request.data['email'], password=request.data['password'])
@@ -199,14 +201,10 @@ class ContactView(APIView):
                         status=status.HTTP_400_BAD_REQUEST)
 
 
-class PartnerUpdate(APIView):
-    """
-    Класс для обновления прайса от поставщика
-    """
+class Partner(viewsets.ViewSet):
     permission_classes = [IsAuthenticated]
-    throttle_scope = 'change_price'
 
-    def post(self, request, *args, **kwargs):
+    def update(self, request):
         if request.user.type != 'shop':
             return Response({'status': False, 'error': 'Только для магазинов'}, status=status.HTTP_403_FORBIDDEN)
 
@@ -233,8 +231,22 @@ class PartnerUpdate(APIView):
 
                 return Response({'status': True})
 
-        return Response({'status': False, 'error': 'Не указаны все необходимые аргументы'},
-                        status=status.HTTP_400_BAD_REQUEST)
+            return Response({'status': False, 'error': 'Не указаны все необходимые аргументы'},
+                            status=status.HTTP_400_BAD_REQUEST)
+
+    def order(self, request):
+        if request.user.type != 'shop':
+            return Response({'status': False, 'error': 'Только для магазинов'}, status=status.HTTP_403_FORBIDDEN)
+
+        pr = Prefetch('ordered_items', queryset=OrderItem.objects.filter(shop__user_id=request.user.id))
+        order = Order.objects.filter(
+            ordered_items__shop__user_id=request.user.id).exclude(status='basket') \
+            .prefetch_related(pr).select_related('contact').annotate(
+            total_sum=Sum('ordered_items__total_amount'),
+            total_quantity=Sum('ordered_items__quantity'))
+
+        serializer = OrderSerializer(order, many=True)
+        return Response(serializer.data)
 
 
 class PartnerState(APIView):
@@ -268,25 +280,25 @@ class PartnerState(APIView):
         return Response({'status': False, 'error': 'Не указан аргумент state.'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-class PartnerOrders(APIView):
-    """
-    Класс для получения заказов поставщиками
-    """
-    permission_classes = [IsAuthenticated]
-
-    def get(self, request, *args, **kwargs):
-        if request.user.type != 'shop':
-            return Response({'status': False, 'error': 'Только для магазинов'}, status=status.HTTP_403_FORBIDDEN)
-
-        pr = Prefetch('ordered_items', queryset=OrderItem.objects.filter(shop__user_id=request.user.id))
-        order = Order.objects.filter(
-            ordered_items__shop__user_id=request.user.id).exclude(status='basket')\
-            .prefetch_related(pr).select_related('contact').annotate(
-            total_sum=Sum('ordered_items__total_amount'),
-            total_quantity=Sum('ordered_items__quantity'))
-
-        serializer = OrderSerializer(order, many=True)
-        return Response(serializer.data)
+# class PartnerOrders(APIView):
+#     """
+#     Класс для получения заказов поставщиками
+#     """
+#     permission_classes = [IsAuthenticated]
+#
+#     def get(self, request, *args, **kwargs):
+#         if request.user.type != 'shop':
+#             return Response({'status': False, 'error': 'Только для магазинов'}, status=status.HTTP_403_FORBIDDEN)
+#
+#         pr = Prefetch('ordered_items', queryset=OrderItem.objects.filter(shop__user_id=request.user.id))
+#         order = Order.objects.filter(
+#             ordered_items__shop__user_id=request.user.id).exclude(status='basket')\
+#             .prefetch_related(pr).select_related('contact').annotate(
+#             total_sum=Sum('ordered_items__total_amount'),
+#             total_quantity=Sum('ordered_items__quantity'))
+#
+#         serializer = OrderSerializer(order, many=True)
+#         return Response(serializer.data)
 
 
 class ShopView(ListAPIView):
@@ -309,6 +321,7 @@ class ProductView(APIView):
     """
     Класс для поиска товаров по выбранной категории и/или по выбранному магазину
     """
+
     def get(self, request, *args, **kwargs):
 
         query = Q(shop__state=True)

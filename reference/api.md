@@ -243,8 +243,8 @@ POST /api/v1/user/details
 ```
 POST /api/v1/user/login
 {
-    "email": "name@domain.com",
-    "password": "пароль",
+    "email": "muder75@gmail.com",
+    "password": "Duke12345",
 }
 
 200 OK
@@ -609,7 +609,7 @@ POST /api/v1/order
 ```
 POST /api/v1/partner/update
 {
-    "token": "b39d0f93f9e895b82f1724832b7c186a",
+    "token": "7ba743f65a4a1cc480fe46f4c6b23661634ad7a4",
     "url": "https://partner-site.ru/files/price.yaml",
 }
 
