@@ -1,7 +1,7 @@
 from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.authtoken.models import Token
-from rest_framework.test import APITestCase, force_authenticate, APIClient
+from rest_framework.test import APITestCase, APIClient
 
 
 class TestAPI(APITestCase):
@@ -26,23 +26,23 @@ class TestAPI(APITestCase):
         )
         return user
 
-    def test_register_user(self):
-        method = '/api/v1/user/register'
-        payload = {'first_name': 'имя ',
-                   'last_name': 'фамилия',
-                   'email': 'a.iskakov1989@gmail.com',
-                   'password': 'qwer1234A',
-                   'company': 'asdads',
-                   'position': '345345'}
-        response = self.client.post(method, payload)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
-
-    def test_mail_confirm(self):
-        method = f'{self.URL}user/register/confirm'
-        payload = {'email': 'a.iskakov1989@gmail.com',
-                   'token': '3abeab8e34a5'}
-        response = self.client.post(method, payload, **self.auth)
-        self.assertEqual(response.status_code, status.HTTP_200_OK)
+    # def test_register_user(self):
+    #     method = '/api/v1/user/register'
+    #     payload = {'first_name': 'имя ',
+    #                'last_name': 'фамилия',
+    #                'email': 'a.iskakov1989@gmail.com',
+    #                'password': 'qwer1234A',
+    #                'company': 'asdads',
+    #                'position': '345345'}
+    #     response = self.client.post(method, payload)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    #
+    # def test_mail_confirm(self):
+    #     method = f'{self.URL}user/register/confirm'
+    #     payload = {'email': 'a.iskakov1989@gmail.com',
+    #                'token': '3abeab8e34a5'}
+    #     response = self.client.post(method, payload, **self.auth)
+    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_contact_add(self):
         method = '/api/v1/user/contact'
@@ -55,6 +55,25 @@ class TestAPI(APITestCase):
                    'phone': '+49564563242'}
         response = self.client.post(path=method, data=payload, **self.auth)
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+
+    def test_contact_edit(self):
+        method = '/api/v1/user/contact'
+        payload = {'city': 'Almaty',
+                   'street': 'Shashkin street 40',
+                   'house': 'Apartament 28',
+                   'structure': '1234',
+                   'building': '123345',
+                   'apartment': '123345',
+                   'id': '1',
+                   'phone': '+45465421654'}
+        response = self.client.put(path=method, data=payload, **self.auth)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+    def test_contact_delete(self):
+        method = '/api/v1/user/contact'
+        payload = {'items': '5, 6, 4'}
+        response = self.client.delete(path=method, data=payload, **self.auth)
+        self.assertEqual(response.status_code, status.HTTP_204_NO_CONTENT)
 
     def test_contacts_list(self):
         method = '/api/v1/user/contact'
