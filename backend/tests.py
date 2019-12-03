@@ -37,12 +37,12 @@ class TestAPI(APITestCase):
     #     response = self.client.post(method, payload)
     #     self.assertEqual(response.status_code, status.HTTP_200_OK)
     #
-    # def test_mail_confirm(self):
-    #     method = f'{self.URL}user/register/confirm'
-    #     payload = {'email': 'a.iskakov1989@gmail.com',
-    #                'token': '3abeab8e34a5'}
-    #     response = self.client.post(method, payload, **self.auth)
-    #     self.assertEqual(response.status_code, status.HTTP_200_OK)
+    def test_mail_confirm(self):
+        method = f'{self.URL}user/register/confirm'
+        payload = {'email': 'a.iskakov1989@gmail.com',
+                   'token': '3abeab8e34a5'}
+        response = self.client.post(method, payload, **self.auth)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
 
     def test_contact_add(self):
         method = '/api/v1/user/contact'
