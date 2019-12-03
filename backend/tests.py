@@ -90,5 +90,18 @@ class TestAPI(APITestCase):
         response = self.client.get(path=method)
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
+    def test_user_detail(self):
+        method = '/api/v1/user/details'
+        payload = {'first_name': 'имя 545',
+                   'last_name': 'фамилия54',
+                   'email': 'a@a.ru11',
+                   'password': 'qwer1234Aasd',
+                   'company': '5345',
+                   'position': '345345sdf'}
+        response = self.client.get(path=method, data=payload, **self.auth)
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+
+
 
 
